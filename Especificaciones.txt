@@ -1,0 +1,55 @@
+Empieza el partido, el partido dura un minuto.
+Se elige aleatoriamente de los dos equipos quien arranca, son 8 jugadores, siendo 4 por equipo, siendo 2 delanteros, un defensa y un arquero.
+Cuando uno de los delanteros pasa la pelota al empezar el partido, lo hace de forma aleatoria a un jugador de su equipo que esté esperando por el pase.
+
+El juego tiene 5 fases:
+- Saque del principio.
+- Pasar a los delanteros
+- Pasar la defensa, que puede ser con un pase al otro delantero, que puede ser interceptado.
+- Hacer un centro, o no, si el azar lo permite.
+- Tirar a portería.
+
+Condiciones:
+- Si el jugador tiene por 5 segundos la pelota sin hacer pases o movimientos, el contrincante más cercano se la va a sacar.
+
+- En caso de que le saquen la pelota a los delanteros, que puede ser hecho por otros delanteros o por la defensa, los jugadores se van a reacomodar a sus posiciones iniciales.
+
+- Los 8 jugadores más las 2 porterías serian elementos que interactuarían con el semáforo que seria la pelota. El arquero y la portería solo van a interactuar con la pelota si el contrincante ya pasó al defensa.
+
+- La defensa le puede sacar la pelota al delantero que está por tirar si demora los 5 segundos que mencioné anteriormente.
+
+- Si el portero para la pelota, hace que en 3 segundo se reacomoden los delanteros para recibir la pelota, que puede ser cualquiera de los dos.
+
+
+Delanteros:
+- Cuando arranca el partido, la pelota está en el medio, y se la pasa a alguno de los dos delanteros de forma al azar.
+
+- El delantero que tiene la pelota, tiene dos opciones:
+	1) Pasar al delantero que tiene adelante con el riesgo de que le saquen la pelota.
+	2) Pasarle la pelota al otro delantero y que se corra el riesgo de que el delantero enemigo le 	saque la pelota.
+
+- Una vez que pase la linea enemiga de los dos delanteros, le toca defender al defensa, y acá el delantero tiene dos opciones:
+	1) Pasar al defensa que tiene con el riesgo de que le saquen la pelota.
+	2) Pasarle la pelota al otro delantero y que se corra el riesgo de que el defensa enemigo le saque la pelota.
+
+- En caso de que el delantero pase al defensa, pueden pasar tres cosas:
+	1) Si se queda más de 5 segundos esperando qué hacer, el defensa de atrás le va a sacar la pelota.
+	2) Le puede pasar la pelota al otro delantero con el riesgo de que el portero la agarre entre medio.
+	3) Puede quedarse él con la pelota y tomar una decisión en menos de 5 segundos.
+
+- En caso que se la haya pasado al otro delantero y el portero no haya agarrado la pelota en el proceso, este puede tirar a anotar, con una probabilidad un poco mayor de anotar. Pero si el delantero anterior decidió no pasarla, este va a tirar a portería, donde puede anotar el gol. 
+
+En caso de anotarlo, se empieza el partido desde el principio, con el equipo rival empezando el partido y arrancando el proceso que acabo de describir desde el principio, y en caso de no anotarlo, el portero tendrá la pelota y este se la va a pasar a alguno de los dos delanteros de su equipo, y una vez que lo haga, los dos delanteros que hicieron todo el ataque, van a volver a sus posiciones frente a los dos delanteros que ahora van a contraatacar.
+
+Defensa:
+- Este va a parar al delantero que tenga la pelota, y puede ser tanto de frente como cuando el delantero decide pasar la pelota.
+
+- En caso de que los delanteros enemigos hayan pasado al defensa, este estará atento en que si el delantero demora 5 segundos en atacar a portería, este le va a sacar la pelota y se la va a pasar a alguno de los dos delanteros, y se va a reiniciar la jugada.
+
+Portero:
+- Este va a actuar una vez que los dos delanteros hayan pasado al defensa, y puede interceptar un pase del delantero principal al otro, o atajar el tiro de cualquiera de los dos delanteros, donde habrá siempre una probabilidad que ataje o no.
+
+- En caso de que ataje, le manda la pelota a cualquiera de los dos delanteros que estén más adelante, y va a hacer que los delanteros que estaban atacando, vuelvan instantemente para atrás, volviendo al partido a su punto inicial pero con los delanteros enemigos atacando.
+
+Porteria:
+- Este elemento va a interactuar con el semáforo que seria la pelota una vez que hayan hecho gol cualquiera de los dos delanteros.
