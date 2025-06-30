@@ -3,7 +3,7 @@ import random
 import time
 import tkinter as tk
 from tkinter import font as tkfont
-from utilidades import (  # Importar desde utilidades
+from utilidades import (
     esperar_paso,
     step_event,
     DURACION_PARTIDO,
@@ -43,71 +43,55 @@ class FootballField(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Simulador de Partido de Fútbol")
-        self.geometry("800x600")
+        self.geometry("1000x800")
         self.configure(bg='green')
-        
-        # Fuentes
         self.bold_font = tkfont.Font(family="Helvetica", size=12, weight="bold")
         self.normal_font = tkfont.Font(family="Helvetica", size=10)
         self.score_font = tkfont.Font(family="Helvetica", size=24, weight="bold")
-        
-        # Canvas para el campo
         self.canvas = tk.Canvas(self, width=800, height=500, bg='green')
-        self.canvas.pack()
-        
-        # Dibujar el campo
+        self.canvas.pack(pady=20)
         self.dibujar_campo()
         
-        # Panel de información
-        self.info_panel = tk.Frame(self, height=100, bg='white')
-        self.info_panel.pack(fill='x')
+        self.info_panel = tk.Frame(self, height=250, bg='white')
+        self.info_panel.pack(fill='both', expand=True, padx=20, pady=(0, 20))
         
-        # Marcador
-        self.score_label = tk.Label(self.info_panel, text="A 0 - 0 B", 
+        top_frame = tk.Frame(self.info_panel, bg='white')
+        top_frame.pack(fill='x', pady=5)
+        self.score_label = tk.Label(top_frame, text="A 0 - 0 B", 
                                    font=self.score_font, bg='white')
-        self.score_label.pack(side='top')
+        self.score_label.pack(side='left', expand=True)
         
-        # Log de eventos
-        self.log_text = tk.Text(self.info_panel, height=4, width=80, 
-                               font=self.normal_font, wrap='word')
-        self.log_text.pack(side='left', fill='both', expand=True)
-        scrollbar = tk.Scrollbar(self.info_panel, command=self.log_text.yview)
-        scrollbar.pack(side='right', fill='y')
-        self.log_text.config(yscrollcommand=scrollbar.set)
-        
-        # Temporizador
-        self.time_label = tk.Label(self.info_panel, text="00:00", 
+        self.time_label = tk.Label(top_frame, text="00:00", 
                                   font=self.bold_font, bg='white')
-        self.time_label.pack(side='top', anchor='e', padx=10)
+        self.time_label.pack(side='right', padx=20)
         
-        # Inicializar jugadores
+        log_frame = tk.Frame(self.info_panel, bg='white')
+        log_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        
+        self.log_text = tk.Text(log_frame, height=10,
+                               font=self.normal_font, wrap='word')
+        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
+        
+        self.log_text.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+        
+        self.log_text.config(yscrollcommand=scrollbar.set)
         self.jugadores_obj = {}
         self.pelota_obj = None
         self.inicializar_jugadores()
-        
-        # Temporizador del partido
         self.tiempo_inicio = time.time()
         self.actualizar_temporizador()
-    
     def dibujar_campo(self):
-        # Líneas del campo
         self.canvas.create_rectangle(50, 50, 750, 450, outline='white', width=2)
         self.canvas.create_line(400, 50, 400, 450, fill='white', width=2)
-        
-        # Áreas
-        self.canvas.create_rectangle(50, 150, 150, 350, outline='white', width=2)  # Área izquierda
-        self.canvas.create_rectangle(650, 150, 750, 350, outline='white', width=2)  # Área derecha
-        
-        # Puntos de penal
-        self.canvas.create_oval(190, 245, 210, 255, fill='white')  # Penal izquierdo
-        self.canvas.create_oval(590, 245, 610, 255, fill='white')  # Penal derecho
-        
-        # Arcos
-        self.canvas.create_rectangle(40, 200, 50, 300, fill='white')  # Arco izquierdo
-        self.canvas.create_rectangle(750, 200, 760, 300, fill='white')  # Arco derecho
+        self.canvas.create_rectangle(50, 150, 150, 350, outline='white', width=2)
+        self.canvas.create_rectangle(650, 150, 750, 350, outline='white', width=2)
+        self.canvas.create_oval(190, 245, 210, 255, fill='white')
+        self.canvas.create_oval(590, 245, 610, 255, fill='white')
+        self.canvas.create_rectangle(40, 200, 50, 300, fill='white')
+        self.canvas.create_rectangle(750, 200, 760, 300, fill='white')
     
     def inicializar_jugadores(self):
-        # Posiciones iniciales
         posiciones = {
             'A_D1': (300, 200),
             'A_D2': (300, 300),
@@ -118,44 +102,28 @@ class FootballField(tk.Tk):
             'B_DEF': (550, 250),
             'B_ARQ': (700, 250)
         }
-        
-        # Crear jugadores en el canvas
         for jugador, pos in posiciones.items():
             equipo = jugador[0]
             color = equipos[equipo]['color']
-            
-            # Crear la figura
             if 'ARQ' in jugador:
                 obj = self.canvas.create_oval(pos[0]-15, pos[1]-15, pos[0]+15, pos[1]+15, fill=color, outline='black')
             elif 'DEF' in jugador:
                 obj = self.canvas.create_rectangle(pos[0]-10, pos[1]-10, pos[0]+10, pos[1]+10, fill=color, outline='black')
             else:
                 obj = self.canvas.create_oval(pos[0]-10, pos[1]-10, pos[0]+10, pos[1]+10, fill=color, outline='black')
-
-            # Crear el texto del nombre
             label = self.canvas.create_text(pos[0], pos[1]-20, text=jugador, fill='white', font=self.normal_font)
-
-            # Guardar ambos
             self.jugadores_obj[jugador] = (obj, label)
-        
-        # Crear pelota
         self.pelota_obj = self.canvas.create_oval(400-5, 250-5, 400+5, 250+5, fill='black')
     
     def mover_jugador(self, jugador, x, y):
         obj, label = self.jugadores_obj[jugador]
-
-        # Actualizar posición de la figura
         if 'ARQ' in jugador:
             self.canvas.coords(obj, x-15, y-15, x+15, y+15)
         elif 'DEF' in jugador:
             self.canvas.coords(obj, x-10, y-10, x+10, y+10)
         else:
             self.canvas.coords(obj, x-10, y-10, x+10, y+10)
-
-        # Mover la etiqueta de texto
         self.canvas.coords(label, x, y-20)
-
-        # Si el jugador tiene la pelota, moverla también
         if jugador == jugador_con_pelota:
             self.mover_pelota(x, y)
 
@@ -168,11 +136,13 @@ class FootballField(tk.Tk):
         self.score_label.config(text=f"A {goles['A']} - {goles['B']} B")
     
     def log(self, msg):
-        timestamp = time.strftime('%H:%M:%S')
+        tiempo_transcurrido = int(time.time() - self.tiempo_inicio)
+        minutos = tiempo_transcurrido // 60
+        segundos = tiempo_transcurrido % 60
+        timestamp = f"{minutos:02d}:{segundos:02d}"
         self.log_text.insert('end', f"[{timestamp}] {msg}\n")
         self.log_text.see('end')
         self.update()
-    
     
     def continuar_paso(self, event=None):
         step_event.set()
@@ -199,14 +169,8 @@ def saque_inicial():
     jugador_con_pelota = random.choice(equipos[equipo_actual]['delanteros'])
     supero_delanteros = False
     supero_defensa = False
-
-    # Reposicionar jugadores en campo (por si se reanuda desde medio)
     reposicionar_jugadores()
-
-    # Mover la pelota al nuevo poseedor
     actualizar_posicion_pelota(jugador_con_pelota)
-
-    # Forzar update antes de que el jugador comience a moverse
     field.update()
     
     log(f"¡Empieza el partido! Equipo {equipo_actual}, {jugador_con_pelota} con la pelota.")
@@ -214,11 +178,9 @@ def saque_inicial():
 
 
 def actualizar_posicion_pelota(jugador):
-    # Obtener posición del jugador
     obj, _ = field.jugadores_obj[jugador]
     coords = field.canvas.coords(obj)
 
-    # Calcular posición central del jugador
     if 'ARQ' in jugador:
         x = (coords[0] + coords[2]) / 2
         y = (coords[1] + coords[3]) / 2
@@ -228,14 +190,12 @@ def actualizar_posicion_pelota(jugador):
     else:
         x = (coords[0] + coords[2]) / 2
         y = (coords[1] + coords[3]) / 2
-    
-    # Mover pelota a la posición del jugador
     field.mover_pelota(x, y)
     field.update()
 
 def acompanar_con_companero(jugador):
     if not jugador.endswith('D1') and not jugador.endswith('D2'):
-        return  # Solo delanteros
+        return
 
     equipo = jugador[0]
     compañeros = [d for d in equipos[equipo]['delanteros'] if d != jugador]
@@ -267,10 +227,8 @@ def control_jugador(jugador):
 
     while partido_activo:
         with pelota:
-            if not partido_activo:  # Verificar nuevamente si el partido terminó
+            if not partido_activo:
                 return
-            
-            # Actualizar posición visual
             actualizar_posicion_pelota(jugador)
             
             log(f"{jugador} tiene la pelota.")
@@ -290,19 +248,15 @@ def control_jugador(jugador):
                     return fase_arquero(jugador)
                 esperar_paso()
 
-            if partido_activo:  # Solo si el partido sigue activo
-                log(f"{jugador} tardó demasiado y pierde la pelota.")
+            if partido_activo:
+                log(f"{jugador} demoró demasiado y le sacan la pelota.")
                 perder_pelota_defensa(jugador)
                 return
 
 def fase_frente_delanteros_rivales(jugador):
     global jugador_con_pelota, supero_delanteros
-    
-    # 1. Identificar al delantero rival más cercano
     rival_pos = 'B' if equipo_actual == 'A' else 'A'
     delantero_rival = encontrar_oponente_mas_cercano(jugador, equipos[rival_pos]['delanteros'])
-    
-    # 2. Animación de superación (dribbling)
     animar_dribbling(jugador, delantero_rival)
     acompanar_con_companero(jugador)
 
@@ -314,7 +268,7 @@ def fase_frente_delanteros_rivales(jugador):
         if random.random() < PROB_DELANTERO_RIVAL_QUITA:
             delantero_rival = encontrar_oponente_mas_cercano(jugador, equipos[rival_pos]['delanteros'])
             animar_pase(jugador, otro, interceptado_por=delantero_rival)
-            log("¡El delantero rival intercepta el pase!")
+            log("El delantero rival intercepta el pase!")
             perder_pelota_delantero_rival()
             return True
         else:
@@ -329,15 +283,13 @@ def fase_frente_delanteros_rivales(jugador):
         log(f"{jugador} intenta superar al delantero rival directamente.")
         
         if random.random() < PROB_DELANTERO_RIVAL_QUITA:
-            log("¡El delantero rival le quita la pelota!")
+            log("El delantero rival le saca la pelota!")
             animar_quita_pelota(delantero_rival, jugador)
             perder_pelota_delantero_rival()
             return True
         else:
             supero_delanteros = True
             log(f"{jugador} logra superar a los delanteros rivales.")
-            
-            # 3. Mover definitivamente al atacante adelante del defensor
             posicionar_adelante_de(jugador, delantero_rival)
             
             threading.Thread(target=control_jugador, args=(jugador,)).start()
@@ -349,19 +301,16 @@ def posicionar_adelante_de(atacante, defensor):
     x_def = (coords_def[0] + coords_def[2]) / 2
     y_def = (coords_def[1] + coords_def[3]) / 2
     
-    if equipo_actual == 'A':  # Avanzar hacia la derecha
+    if equipo_actual == 'A':
         nuevo_x = x_def + 40
-    else:  # Avanzar hacia la izquierda
+    else:
         nuevo_x = x_def - 40
     
     field.mover_jugador(atacante, nuevo_x, y_def)
     actualizar_posicion_pelota(atacante)
     field.update()
 
-
-
 def animar_dribbling(atacante, defensor):
-    # Mover atacante hacia el defensor
     obj_atk, _ = field.jugadores_obj[atacante]
     coords_atk = field.canvas.coords(obj_atk)
     x_atk = (coords_atk[0] + coords_atk[2]) / 2
@@ -372,7 +321,6 @@ def animar_dribbling(atacante, defensor):
     x_def = (coords_def[0] + coords_def[2]) / 2
     y_def = (coords_def[1] + coords_def[3]) / 2
 
-    # Animación de acercamiento
     pasos = 9
     for i in range(1, pasos + 1):
         nuevo_x = x_atk + (x_def - x_atk) * 0.3 * i/pasos
@@ -380,7 +328,6 @@ def animar_dribbling(atacante, defensor):
         time.sleep(0.05)
     esperar_paso()
 
-    # Animación de superación (movimiento lateral + adelante)
     direccion = 1 if random.random() > 0.5 else -1
     for i in range(1, 4):
         nuevo_x = x_def + 10 * direccion * i/3
@@ -416,11 +363,7 @@ def encontrar_oponente_mas_cercano(jugador, oponentes):
 
 def fase_frente_defensa(jugador):
     global jugador_con_pelota, supero_defensa
-    
-    # Mover jugador atacante hacia adelante
     mover_hacia_adelante(jugador, 30)
-    
-    # Mover defensa rival hacia atrás (simulando que fue superado)
     rival_pos = 'B' if equipo_actual == 'A' else 'A'
     defensa_rival = equipos[rival_pos]['defensa']
     mover_hacia_atras(defensa_rival, 20)
@@ -435,7 +378,7 @@ def fase_frente_defensa(jugador):
         if random.random() < PROB_DEFENSA_INTERCEPTA:
             defensa_rival = equipos[rival_pos]['defensa']
             animar_pase(jugador, otro, interceptado_por=defensa_rival)
-            log("¡El defensa intercepta el pase!")
+            log("El defensa intercepta el pase!")
             perder_pelota_defensa(jugador)
             return True
         else:
@@ -449,15 +392,13 @@ def fase_frente_defensa(jugador):
         log(f"{jugador} intenta superar al defensa directamente.")
         
         if random.random() < PROB_DEFENSA_QUITA:
-            log("¡El defensa le quita la pelota!")
+            log("El defensa le saca la pelota!")
             animar_quita_pelota(defensa_rival, jugador)
             perder_pelota_defensa(jugador)
             return True
         else:
             supero_defensa = True
             log(f"{jugador} logra superar al defensa.")
-            
-            # Mover más adelante al atacante exitoso
             mover_hacia_adelante(jugador, 40)
             
             threading.Thread(target=control_jugador, args=(jugador,)).start()
@@ -465,27 +406,23 @@ def fase_frente_defensa(jugador):
 
 def fase_final_arco(jugador):
     global goles
-    
-    # Mover jugador hacia el arco
     mover_hacia_arco(jugador)
     acompanar_con_companero(jugador)
     
     accion = random.choice(['tiro', 'pase_tiro', 'duda'])
     if accion == 'tiro':
         log(f"{jugador} dispara al arco.")
-        
-        # Animación de tiro con resultado real
         es_gol = animar_tiro(jugador)
         acompanar_con_companero(jugador)
         
         if es_gol:
-            log("¡GOOOOOOL!")
+            log("GOOOOOOL!")
             goles[equipo_actual] += 1
             field.actualizar_marcador()
             reiniciar_partido()
             return
         else:
-            log("El arquero ataja el disparo.")
+            log("El arquero ataja el tiro.")
             portero = equipos[rival()]['arquero']
             threading.Thread(target=control_jugador, args=(portero,)).start()
         return True
@@ -505,8 +442,8 @@ def fase_final_arco(jugador):
 
         if random.random() < PROB_PORTERO_INTERCEPTA_PASE:
             portero = equipos[rival()]['arquero']
-            log("¡El arquero intercepta el pase!")
-            animar_pase(jugador, otro, interceptado_por=portero)  # << Solo esta animación
+            log("El arquero intercepta el pase!")
+            animar_pase(jugador, otro, interceptado_por=portero)
             threading.Thread(target=control_jugador, args=(portero,)).start()
         else:
             animar_pase(jugador, otro)
@@ -515,7 +452,7 @@ def fase_final_arco(jugador):
             
             es_gol = animar_tiro(otro)
             if es_gol:
-                log("¡GOOOOOOL!")
+                log("GOOOOOOL!")
                 goles[equipo_actual] += 1
                 field.actualizar_marcador()
                 reiniciar_partido()
@@ -524,28 +461,10 @@ def fase_final_arco(jugador):
                 log("El arquero ataja el disparo.")
                 portero = equipos[rival()]['arquero']
                 threading.Thread(target=control_jugador, args=(portero,)).start()
-
-            jugador_con_pelota = otro
-            log(f"{otro} recibe el centro y se prepara para disparar.")
-            
-            # Animación de tiro
-            es_gol = animar_tiro(otro)
-
-            if es_gol:
-                log("¡GOOOOOOL!")
-                goles[equipo_actual] += 1
-                field.actualizar_marcador()
-                reiniciar_partido()
-                return
-            else:
-                log("El arquero ataja el disparo.")
-                portero = equipos[rival()]['arquero']
-                threading.Thread(target=control_jugador, args=(portero,)).start()
-            return True
         return True
 
 def fase_defensa_contraataque(jugador):
-    global jugador_con_pelota  # Aseguramos modificar la global
+    global jugador_con_pelota
     
     log(f"{jugador} recupera la pelota y pasa a un delantero.")
     
@@ -553,11 +472,11 @@ def fase_defensa_contraataque(jugador):
     
     nuevo = random.choice(equipos[equipo_actual]['delanteros'])
     
-    jugador_con_pelota = nuevo  # Primero asignamos
+    jugador_con_pelota = nuevo
     
-    actualizar_posicion_pelota(nuevo)  # Forzamos a que la pelota ya esté con el nuevo
+    actualizar_posicion_pelota(nuevo)
     
-    animar_pase(jugador, nuevo)  # Después hacemos la animación
+    animar_pase(jugador, nuevo)
     
     threading.Thread(target=control_jugador, args=(nuevo,)).start()
 
@@ -566,8 +485,6 @@ def fase_arquero(jugador):
     global equipo_actual, jugador_con_pelota, supero_delanteros, supero_defensa
 
     log(f"{jugador} ataja y pasa a un delantero.")
-    
-    # Reposicionar jugadores antes de reiniciar
     reposicionar_jugadores()
 
     esperar_paso()
@@ -575,9 +492,9 @@ def fase_arquero(jugador):
     equipo_actual = jugador[0]
     nuevo = random.choice(equipos[equipo_actual]['delanteros'])
 
-    jugador_con_pelota = nuevo  # Primero asignar
-    actualizar_posicion_pelota(nuevo)  # Mover la pelota al nuevo jugador
-    field.update()  # Asegurar renderizado antes de que empiece a moverse
+    jugador_con_pelota = nuevo
+    actualizar_posicion_pelota(nuevo)
+    field.update()
     
     log(f"{jugador} pasa a {nuevo}.")
     
@@ -592,8 +509,6 @@ def perder_pelota_delantero_rival():
     equipo_actual = rival()
     supero_delanteros = False
     supero_defensa = False
-    
-    # Reposicionar jugadores antes del contraataque
     reposicionar_jugadores()
     
     nuevo = random.choice(equipos[equipo_actual]['delanteros'])
@@ -607,8 +522,6 @@ def perder_pelota_defensa(jugador):
     equipo_actual = rival()
     supero_delanteros = False
     supero_defensa = False
-    
-    # Reposicionar jugadores antes del contraataque
     reposicionar_jugadores()
     
     defensa = equipos[equipo_actual]['defensa']
@@ -618,13 +531,22 @@ def perder_pelota_defensa(jugador):
     threading.Thread(target=control_jugador, args=(defensa,)).start()
 
 def reiniciar_partido():
-    global equipo_actual
-    equipo_actual = rival()
+    global equipo_actual, jugador_con_pelota, supero_delanteros, supero_defensa
     
-    # Reposicionar jugadores
+    equipo_que_recibio_el_gol = rival()
+    equipo_actual = equipo_que_recibio_el_gol
+    
+    supero_delanteros = False
+    supero_defensa = False
+    
     reposicionar_jugadores()
     
-    saque_inicial()
+    jugador_con_pelota = random.choice(equipos[equipo_que_recibio_el_gol]['delanteros'])
+    
+    actualizar_posicion_pelota(jugador_con_pelota)
+    
+    log(f"Saque inicial para el equipo {equipo_que_recibio_el_gol}! {jugador_con_pelota} con la pelota.")
+    threading.Thread(target=control_jugador, args=(jugador_con_pelota,)).start()
 
 def rival():
     return 'A' if equipo_actual == 'B' else 'B'
@@ -635,12 +557,11 @@ def mover_hacia_adelante(jugador, distancia):
     x = (coords[0] + coords[2]) / 2
     y = (coords[1] + coords[3]) / 2
     
-    if 'A' in jugador:  # Equipo A ataca hacia la derecha
+    if 'A' in jugador:
         nuevo_x = min(x + distancia, 700)
-    else:  # Equipo B ataca hacia la izquierda
+    else:
         nuevo_x = max(x - distancia, 100)
     
-    # Animación suave del movimiento
     pasos = 15
     for i in range(1, pasos + 1):
         temp_x = x + (nuevo_x - x) * i / pasos
@@ -657,12 +578,11 @@ def mover_hacia_atras(jugador, distancia):
     x = (coords[0] + coords[2]) / 2
     y = (coords[1] + coords[3]) / 2
     
-    if 'A' in jugador:  # Equipo A retrocede hacia la izquierda
+    if 'A' in jugador:
         nuevo_x = max(x - distancia, 100)
-    else:  # Equipo B retrocede hacia la derecha
+    else:
         nuevo_x = min(x + distancia, 700)
     
-    # Animación suave del movimiento
     pasos = 15
     for i in range(1, pasos + 1):
         temp_x = x + (nuevo_x - x) * i / pasos
@@ -678,35 +598,31 @@ def mover_hacia_arco(jugador):
     x = (coords[0] + coords[2]) / 2
     y = (coords[1] + coords[3]) / 2
     
-    if 'A' in jugador:  # Equipo A ataca hacia la derecha
-        nuevo_x = min(x + 80, 650)  # Hasta el área rival
-    else:  # Equipo B ataca hacia la izquierda
-        nuevo_x = max(x - 80, 150)  # Hasta el área rival
+    if 'A' in jugador:
+        nuevo_x = min(x + 80, 650)
+    else:
+        nuevo_x = max(x - 80, 150)
     
     field.mover_jugador(jugador, nuevo_x, y)
     actualizar_posicion_pelota(jugador)
     esperar_paso()
 
 def animar_pase(remitente, destinatario, interceptado_por=None):
-    # Obtener posiciones del remitente
     obj_rem, _ = field.jugadores_obj[remitente]
     coords_rem = field.canvas.coords(obj_rem)
     x_rem = (coords_rem[0] + coords_rem[2]) / 2
     y_rem = (coords_rem[1] + coords_rem[3]) / 2
 
-    # Posición del destinatario
     obj_dest, _ = field.jugadores_obj[destinatario]
     coords_dest = field.canvas.coords(obj_dest)
     x_dest = (coords_dest[0] + coords_dest[2]) / 2
     y_dest = (coords_dest[1] + coords_dest[3]) / 2
 
     if interceptado_por:
-        # Calcular punto de intercepción
         factor_intercep = 0.6
         x_intercep = x_rem + (x_dest - x_rem) * factor_intercep
         y_intercep = y_rem + (y_dest - y_rem) * factor_intercep
 
-        # Mover el interceptor hacia el punto
         obj_int, _ = field.jugadores_obj[interceptado_por]
         coords_int = field.canvas.coords(obj_int)
         x_int = (coords_int[0] + coords_int[2]) / 2
@@ -719,7 +635,6 @@ def animar_pase(remitente, destinatario, interceptado_por=None):
             field.mover_jugador(interceptado_por, xi, yi)
             time.sleep(0.03)
 
-        # Animar pelota hacia ese punto
         pasos_pelota = 25
         for i in range(pasos_pelota + 1):
             x = x_rem + (x_intercep - x_rem) * i / pasos_pelota
@@ -731,7 +646,6 @@ def animar_pase(remitente, destinatario, interceptado_por=None):
         actualizar_posicion_pelota(interceptado_por)
 
     else:
-        # Pase normal al compañero
         pasos = 30
         for i in range(pasos + 1):
             x = x_rem + (x_dest - x_rem) * i / pasos
@@ -747,7 +661,6 @@ def animar_tiro(jugador):
     x = (coords[0] + coords[2]) / 2
     y = (coords[1] + coords[3]) / 2
 
-    # Coordenadas del arco
     if 'A' in jugador:
         x_arco = 750
     else:
@@ -756,7 +669,6 @@ def animar_tiro(jugador):
 
     sera_gol = random.random() < PROB_GOL
 
-    # Si es gol, va al arco
     if sera_gol:
         pasos = 20
         for i in range(pasos + 1):
@@ -769,18 +681,15 @@ def animar_tiro(jugador):
         return True
 
     else:
-        # Si no es gol, la pelota va hacia el arco, pero el arquero se mueve e intercepta antes
         portero = equipos[rival()]['arquero']
         obj_arq, _ = field.jugadores_obj[portero]
         coords_arq = field.canvas.coords(obj_arq)
         x_arq = (coords_arq[0] + coords_arq[2]) / 2
         y_arq = (coords_arq[1] + coords_arq[3]) / 2
 
-        # Punto de intercepción (antes de llegar al arco)
         x_intercep = x + (x_arco - x) * 0.7
         y_intercep = y + (y_arco - y) * 0.7
 
-        # Mover arquero hacia la intercepción
         pasos_arq = 15
         for i in range(1, pasos_arq + 1):
             xa = x_arq + (x_intercep - x_arq) * i / pasos_arq
@@ -788,7 +697,6 @@ def animar_tiro(jugador):
             field.mover_jugador(portero, xa, ya)
             time.sleep(0.03)
 
-        # Animar pelota hacia el punto de intercepción
         pasos_pelota = 30
         for i in range(pasos_pelota + 1):
             xp = x + (x_intercep - x) * i / pasos_pelota
@@ -801,13 +709,10 @@ def animar_tiro(jugador):
         return False
 
 def animar_cambio_posesion(nuevo_jugador):
-    # Mover pelota al nuevo jugador
     obj, _ = field.jugadores_obj[nuevo_jugador]
     coords = field.canvas.coords(obj)
     x = (coords[0] + coords[2]) / 2
     y = (coords[1] + coords[3]) / 2
-    
-    # Animación rápida
     field.mover_pelota(x, y)
     field.update()
 
@@ -832,7 +737,6 @@ def animar_quita_pelota(defensor, poseedor):
 
 
 def reposicionar_jugadores():
-    # Posiciones iniciales
     posiciones = {
         'A_D1': (300, 200),
         'A_D2': (300, 300),
@@ -847,7 +751,6 @@ def reposicionar_jugadores():
     for jugador, pos in posiciones.items():
         field.mover_jugador(jugador, pos[0], pos[1])
     
-    # Pelota en el centro (aunque luego se moverá al jugador correspondiente)
     field.mover_pelota(400, 250)
     field.update()
 
@@ -858,16 +761,12 @@ def partido():
     while time.time() - inicio < DURACION_PARTIDO and partido_activo:
         esperar_paso()
     partido_activo = False
-    log("¡Fin del partido!")
+    log("FIN DEL PARTIDO")
     log(f"Resultado final: Equipo A {goles['A']} - {goles['B']} Equipo B")
 
 if __name__ == "__main__":
     field = FootballField()
-    
-    # Iniciar partido en un hilo separado
     threading.Thread(target=partido, daemon=True).start()
     
-    field.mainloop()
-
-
-
+    field.mainloop() # Hilo de la interfaz gráfica
+    step_event.set()  # Permitir que el primer paso se ejecute inmediatamente
