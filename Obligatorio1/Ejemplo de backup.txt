@@ -1,0 +1,35 @@
+./mybackup.sh -c -q /home/saguerre/Obligatorio1
+
+-c: Se quiere comprimir
+
+-q: que se quiere comprimir y después va el dónde se quiere mandar ese archivo comprimido
+
+---------------------
+
+./mybackup.sh -d archivo_comprimido.tar.gz
+
+-d: Se quiere descomprimir
+
+---------------------
+
+./mybackup.sh -m archivo_comprimido.tar.gz
+
+-m: Se quiere mostrar que hay en el archivo comprimido
+
+---------------------
+
+./mybackup.sh -e
+
+-e: Editar mybackup.conf
+
+---------------------
+
+./mybackup.sh -b
+
+-b: Entrar al crontab para modificarlo
+
+---------------------
+
+./mybackup.sh -a
+
+-a: Abrir el menú simple
